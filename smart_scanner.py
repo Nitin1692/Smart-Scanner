@@ -13,10 +13,15 @@ while True:
     frame_cvt = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     frame_blur = cv2.GaussianBlur(frame_cvt, (5,5), 0)
     frame_edge = cv2.Canny(frame_blur, 30, 50)
-    cv2.imshow('Smart Scanner', frame_edge)
     contours, h = cv2.findContours(frame_edge, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
-    if cv2.waitKey(1) == ord('s'):
-        img_pil = Image.fromarray(frame)
-        time_str = time.strftime('%Y-%m-%d-%H-%M-%S')
-        img_pil.save(f'{time_str}.pdf') 
-        print(time_str)
+    if contours:
+        max_contour = max(contours, key=cv2.contourArea)
+        x, y, w, h = cv2.boundingRect(max_contour)
+        if cv2.contourArea(max_contour) > 5000:
+            object_only = frame[y:y+h, x:x+w]
+            cv2.imshow('Smart Scanner', object_only)    
+            if cv2.waitKey(1) == ord('s'):
+                img_pil = Image.fromarray(object_only)
+                time_str = time.strftime('%Y-%m-%d-%H-%M-%S')
+                img_pil.save(f'{time_str}.pdf') 
+                print(time_str)
